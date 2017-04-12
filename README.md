@@ -2,5 +2,5 @@
 Crawl Tunisian websites
 
 ## crawled websites
-    - http://mytek.tn
-    - http://zoom.com.tn
+    * http://mytek.tn
+    * http://zoom.com.tn
