@@ -2,22 +2,22 @@
 import scrapy
 
 
-class MytekSpider(scrapy.Spider):
-    name = "mytek"
-    allowed_domains = ["mytek.tn"]
+class ZoomSpider(scrapy.Spider):
+    name = "zoom"
+    allowed_domains = ["zoom.com.tn"]
 
     def start_requests(self):
-        url = 'http://www.mytek.tn/recherche?controller=search&orderby=position'
-        url += '&orderway=desc&search_query='
+        url = 'http://www.zoom.com.tn/search'
+        url += '?orderby=position&orderway=desc&search_query='
         url += '%s&submit_search=' % self.product.replace(" ", "+")
         yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
         # print "[OUTPUT]-[%s] { %s }" % ( response.url, response.text)
 
-        for prod in response.css("ul.product_list  div.product-container"):
-            link = prod.css("h5 a.product-name::attr('href')").extract_first()
-            name = prod.css("h5 a.product-name ::text").extract_first()
+        for prod in response.css("ul.product_list  div.product-container.full"):
+            link = prod.css("h5.product-name a::attr('href')").extract_first()
+            name = prod.css("h5.product-name a::attr('title')").extract_first()
             description = prod.css("p.product-desc ::text").extract_first()
             price = prod.css("span.product-price ::text").extract_first()
             available = prod.css("span.availability ::text").extract_first()
@@ -34,6 +34,7 @@ class MytekSpider(scrapy.Spider):
                 },
                 "img": img
                 }
+
             next_page_e = response.css('li#pagination_next a::attr("href")')
             next_page = next_page_e.extract_first()
             if next_page is not None:
