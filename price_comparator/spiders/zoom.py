@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from price_comparator.items import Product
+from price_comparator.items import Category
 
 
 class ZoomSpider(scrapy.Spider):
@@ -22,15 +24,14 @@ class ZoomSpider(scrapy.Spider):
     def parse_categories(self, response):
         for category in response.css("#content li a"):
             name = category.css("::text").extract()[0]
-            url = category.css("::attr(href)").extract()[0]
-            yield {
-                "category": {
-                    "name": name,
-                    "url": url
-                    }
-                }
-            if url is not None:
-                yield scrapy.Request(url=url, callback=self.parse)
+            link = category.css("::attr(href)").extract()[0]
+            category = Category()
+            category['name'] = name
+            category['link'] = link
+            yield category
+
+            if link is not None:
+                yield scrapy.Request(url=link, callback=self.parse)
 
     def parse(self, response):
         for prod in response.css("ul.product_list  div.product-container.full"):
@@ -38,22 +39,16 @@ class ZoomSpider(scrapy.Spider):
             name = prod.css("h5.product-name a::attr('title')").extract_first()
             description = prod.css("p.product-desc ::text").extract_first()
             price = prod.css("span.product-price ::text").extract_first()
-            available = prod.css("span.availability ::text").extract_first()
+            # available = prod.css("span.availability ::text").extract_first()
             img = prod.css("a.product_img_link::attr('href')").extract_first()
 
-            yield {
-                "product": {
-                    "link": link,
-                    "name": name,
-                    "description": description,
-                    "offers":
-                    {
-                        "price": price,
-                        "available": available
-                    },
-                    "img": img
-                    }
-            }
+            product = Product()
+            product['name'] = name
+            product['price'] = price
+            product['description'] = description
+            product['link'] = link
+            product['img'] = img
+            yield product
 
             next_page_e = response.css('li#pagination_next a::attr("href")')
             next_page = next_page_e.extract_first()

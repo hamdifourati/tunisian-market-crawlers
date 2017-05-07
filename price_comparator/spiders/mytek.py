@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from price_comparator.items import Product
+from price_comparator.items import Category
 
 
 class MytekSpider(scrapy.Spider):
@@ -23,15 +25,15 @@ class MytekSpider(scrapy.Spider):
     def parse_categories(self, response):
         for category in response.css("#menu li a"):
             name = category.css("::text").extract_first()
-            url = category.css("::attr(href)").extract_first()
-            yield {
-                    "category": {
-                        "name": name,
-                        "url": url
-                    }
-            }
-            if url is not None:
-                yield scrapy.Request(url=url, callback=self.parse)
+            link = category.css("::attr(href)").extract_first()
+
+            category = Category()
+            category['name'] = name
+            category['link'] = link
+            yield category
+
+            if link is not None:
+                yield scrapy.Request(url=link, callback=self.parse)
 
     def parse(self, response):
 
@@ -40,23 +42,18 @@ class MytekSpider(scrapy.Spider):
             name = prod.css("h5 a.product-name ::text").extract_first()
             description = prod.css("p.product-desc ::text").extract_first()
             price = prod.css("span.product-price ::text").extract_first()
-            available = prod.css("span.availability ::text").extract_first()
+            # available = prod.css("span.availability ::text").extract_first()
             img = prod.css("a.product_img_link img::attr('src')")\
                 .extract_first()
 
-            yield {
-                "product": {
-                    "link": link,
-                    "name": name,
-                    "description": description,
-                    "offers":
-                    {
-                        "price": price,
-                        "available": available
-                    },
-                    "img": img
-                }
-            }
+            product = Product()
+            product['name'] = name
+            product['price'] = price
+            product['description'] = description
+            product['link'] = link
+            product['img'] = img
+            yield product
+
             next_page_e = response.css('li#pagination_next a::attr("href")')
             next_page = next_page_e.extract_first()
             if next_page is not None:

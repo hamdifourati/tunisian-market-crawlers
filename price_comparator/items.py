@@ -8,6 +8,19 @@
 import scrapy
 
 
+class Category(scrapy.Item):
+    name = scrapy.Field()
+    link = scrapy.Field()
+
+
+class Product(scrapy.Item):
+    name = scrapy.Field()
+    price = scrapy.Field()
+    description = scrapy.Field()
+    link = scrapy.Field()
+    img = scrapy.Field()
+
+
 class PriceComparatorItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
